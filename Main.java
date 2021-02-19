@@ -38,23 +38,20 @@ class DrawPanel extends JPanel {
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);  
-        Graphics2D g2d = (Graphics2D) g; 
 
         for (int i = 0; i < 10; i++) {
-          g2d.setPaint(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
-          g2d.fill(c.generateCircle(getWidth(), getHeight()));
+          c.paintCircle(getWidth(), getHeight(), g);
         }
     }  
 
     private Circle c = new Circle();
-    private Random rand = new Random();  
+
 }
 
 class Circle {
   
-  public Ellipse2D generateCircle(int panelWidth, int panelHeight) {
+  private Ellipse2D generateCircle(int panelWidth, int panelHeight) {
 
-    Random rand = new Random();
     int diameter = rand.nextInt(45) + 5;
     int rightLimit = panelWidth-diameter;
     int bottomLimit = panelHeight-diameter;
@@ -64,4 +61,11 @@ class Circle {
     return new Ellipse2D.Double(xLoc, yLoc, diameter, diameter);
   }
 
+  public void paintCircle(int panelWidth, int panelHeight, Graphics g) {
+    Graphics2D g2d = (Graphics2D) g; 
+    g2d.setPaint(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
+    g2d.fill(generateCircle(panelWidth, panelHeight));
+  }
+
+  private Random rand = new Random();  
 }
