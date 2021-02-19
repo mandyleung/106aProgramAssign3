@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.util.Random;
 import java.awt.Graphics2D;
 import java.io.*;
+import java.util.ArrayList;
 
 class Main {
   public static void main(String[] args) {
@@ -24,48 +25,57 @@ class DrawCircles extends JFrame {
   public void drawCircles() {
     JFrame f = new JFrame("Draw Random Circles");
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    f.add(new DrawPanel());
+    DrawPanel d = new DrawPanel();
+    f.add(d);
     f.pack();
     f.setVisible(true);
+
+    // for (int i = 0; i < 10; i++) {
+    //   c.generateCircle(d.getWidth(), d.getHeight());
+    // }
   }
 }
 
 class DrawPanel extends JPanel {
 
-    public Dimension getPreferredSize() {
-        return new Dimension(250,200);
+  public DrawPanel() {
+    for (int i = 0; i < 10; i++) {
+      c.generateCircle(getPreferredSize().width, getPreferredSize().height);
     }
+  }
 
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);  
+  public Dimension getPreferredSize() {
+      return new Dimension(250,200);
+  }
 
-        for (int i = 0; i < 10; i++) {
-          c.paintCircle(getWidth(), getHeight(), g);
-        }
-    }  
+  public void paintComponent(Graphics g) {
+      super.paintComponent(g);  
+      c.paintCircle(g);
+  }  
 
-    private Circle c = new Circle();
+  private Circle c = new Circle();
 
 }
 
 class Circle {
   
-  private Ellipse2D generateCircle(int panelWidth, int panelHeight) {
-
+  public void generateCircle(int panelWidth, int panelHeight) {
     int diameter = rand.nextInt(45) + 5;
     int rightLimit = panelWidth-diameter;
     int bottomLimit = panelHeight-diameter;
     int xLoc = rand.nextInt(rightLimit);
     int yLoc = rand.nextInt(bottomLimit);
-
-    return new Ellipse2D.Double(xLoc, yLoc, diameter, diameter);
+    circles.add(new Ellipse2D.Double(xLoc, yLoc, diameter, diameter));
   }
 
-  public void paintCircle(int panelWidth, int panelHeight, Graphics g) {
+  public void paintCircle(Graphics g) {
     Graphics2D g2d = (Graphics2D) g; 
-    g2d.setPaint(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
-    g2d.fill(generateCircle(panelWidth, panelHeight));
+    for (int i = 0; i < circles.size(); i++) {
+      g2d.setPaint(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
+      g2d.fill(circles.get(i));
+    }
   }
 
   private Random rand = new Random();  
+  private ArrayList<Ellipse2D> circles = new ArrayList<Ellipse2D>();
 }
