@@ -8,10 +8,8 @@ import java.util.Random;
 import java.awt.Graphics2D;
 import java.io.*;
 import java.util.Arrays;
-// import java.awt.event.MouseEvent;
-// import java.awt.event.MouseListener;
-// import java.awt.event.MouseAdapter;
 import java.awt.event.*;
+import java.awt.geom.Rectangle2D;
 
 class Main {
   public static void main(String[] args) {
@@ -42,7 +40,8 @@ class DrawPanel extends JPanel {
 
     addMouseMotionListener(new MouseMotionAdapter(){
       public void mouseMoved(MouseEvent m){
-        xPaddle = Math.min(Math.max(m.getX() - (PADDLE_WIDTH / 2), 0), WIDTH - PADDLE_WIDTH);
+        int xPaddle = Math.min(Math.max(m.getX() - (PADDLE_WIDTH / 2), 0), WIDTH - PADDLE_WIDTH);
+        paddle.setRect(xPaddle, paddle.getY(), PADDLE_WIDTH, PADDLE_HEIGHT);
         repaint();
       }
     });
@@ -51,17 +50,22 @@ class DrawPanel extends JPanel {
 
   private void init() {
     /** Initialize location, color and visibility of bricks at the beginning of a game */
+    int xPos, yPos;
+    xPos = yPos = 0;
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
-        xBrick[i][j] =  (BRICK_SEP + BRICK_WIDTH) * i;
-        yBrick[i][j] = BRICK_Y_OFFSET + ((BRICK_SEP + BRICK_HEIGHT) * j);
+        xPos =  (BRICK_SEP + BRICK_WIDTH) * i;
+        yPos = BRICK_Y_OFFSET + ((BRICK_SEP + BRICK_HEIGHT) * j);
+        bricks[i][j] = new Rectangle2D.Double(xPos, yPos, BRICK_WIDTH, BRICK_HEIGHT);
         visi[i][j] = true; 
       }
     }
 
-    /** Initialize location of paddle */
-    xPaddle = (WIDTH / 2) - (PADDLE_WIDTH / 2);
-    yPaddle = HEIGHT - BRICK_Y_OFFSET;
+    /** Initialize paddle */
+    int xPaddle = (WIDTH / 2) - (PADDLE_WIDTH / 2);
+    int yPaddle = HEIGHT - BRICK_Y_OFFSET;
+    paddle = new Rectangle2D.Double(xPaddle, yPaddle, PADDLE_WIDTH, PADDLE_HEIGHT);
+
   }
 
   public Dimension getPreferredSize() {
@@ -70,18 +74,17 @@ class DrawPanel extends JPanel {
 
   public void paintComponent(Graphics g) {
     super.paintComponent(g);  
+    Graphics2D g2d = (Graphics2D) g;
     /** Paint Bricks **/
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
-        if (visi[i][j]) {
-          g.setColor(rowColor[j]);
-          g.fillRect(xBrick[i][j], yBrick[i][j], BRICK_WIDTH, BRICK_HEIGHT);
-        }
+        g2d.setColor(rowColor[j]);
+        g2d.fill(bricks[i][j]);
       }
     }
     /** Paint Paddle **/
-    g.setColor(Color.BLACK);
-    g.fillRect(xPaddle, yPaddle, PADDLE_WIDTH, PADDLE_HEIGHT);
+    g2d.setColor(Color.BLACK);
+    g2d.fill(paddle);
   }  
 
   /** Width and height of application window in pixels */
@@ -112,17 +115,14 @@ class DrawPanel extends JPanel {
   private static final int HEIGHT = APPLICATION_HEIGHT;
   /** Number of turns */
   private static final int NTURNS = 3;
-  /** x-coordinate of array of bricks **/
-  private int[][] xBrick = new int[NBRICKS_PER_ROW][NBRICK_ROWS];
-  /** y-coordinate of array of bricks **/
-  private int[][] yBrick = new int[NBRICKS_PER_ROW][NBRICK_ROWS];
+  /** Array of bricks **/
+  private Rectangle2D[][] bricks = new Rectangle2D[NBRICKS_PER_ROW][NBRICK_ROWS];
   /** Color of bricks by row **/
   private Color[] rowColor = new Color[]{Color.RED, Color.RED, Color.ORANGE, Color.ORANGE, Color.YELLOW, Color.YELLOW, Color.GREEN, Color.GREEN, Color.CYAN, Color.CYAN};
   /** Visibility of array of bricks **/
   private Boolean[][] visi = new Boolean[NBRICKS_PER_ROW][NBRICK_ROWS];
-  /** Paddle x and y position **/
-  private int xPaddle = 0;
-  private int yPaddle = 0;
+  /** Paddle object **/
+  private Rectangle2D paddle;
 }
 
 // class Circle {
