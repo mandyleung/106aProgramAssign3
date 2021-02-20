@@ -8,6 +8,10 @@ import java.util.Random;
 import java.awt.Graphics2D;
 import java.io.*;
 import java.util.Arrays;
+// import java.awt.event.MouseEvent;
+// import java.awt.event.MouseListener;
+// import java.awt.event.MouseAdapter;
+import java.awt.event.*;
 
 class Main {
   public static void main(String[] args) {
@@ -35,17 +39,29 @@ class DrawPanel extends JPanel {
 
   public DrawPanel() {
     init();
+
+    addMouseMotionListener(new MouseMotionAdapter(){
+      public void mouseMoved(MouseEvent m){
+        xPaddle = Math.min(Math.max(m.getX() - (PADDLE_WIDTH / 2), 0), WIDTH - PADDLE_WIDTH);
+        repaint();
+      }
+    });
   }
 
-  /** Initialize location, color and visibility of bricks at the beginning of a game */
+
   private void init() {
+    /** Initialize location, color and visibility of bricks at the beginning of a game */
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
-        xPos[i][j] = BRICK_SEP + ((BRICK_SEP + BRICK_WIDTH) * i);
-        yPos[i][j] = BRICK_Y_OFFSET + ((BRICK_SEP + BRICK_HEIGHT) * j);
+        xBrick[i][j] =  (BRICK_SEP + BRICK_WIDTH) * i;
+        yBrick[i][j] = BRICK_Y_OFFSET + ((BRICK_SEP + BRICK_HEIGHT) * j);
         visi[i][j] = true; 
       }
     }
+
+    /** Initialize location of paddle */
+    xPaddle = (WIDTH / 2) - (PADDLE_WIDTH / 2);
+    yPaddle = HEIGHT - BRICK_Y_OFFSET;
   }
 
   public Dimension getPreferredSize() {
@@ -54,20 +70,23 @@ class DrawPanel extends JPanel {
 
   public void paintComponent(Graphics g) {
     super.paintComponent(g);  
+    /** Paint Bricks **/
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
-        g.setColor(rowColor[j]);
-        g.drawRect(xPos[i][j], yPos[i][j], BRICK_WIDTH, BRICK_HEIGHT);
+        if (visi[i][j]) {
+          g.setColor(rowColor[j]);
+          g.fillRect(xBrick[i][j], yBrick[i][j], BRICK_WIDTH, BRICK_HEIGHT);
+        }
       }
     }
+    /** Paint Paddle **/
+    g.setColor(Color.BLACK);
+    g.fillRect(xPaddle, yPaddle, PADDLE_WIDTH, PADDLE_HEIGHT);
   }  
 
   /** Width and height of application window in pixels */
   public static final int APPLICATION_WIDTH = 400;
   public static final int APPLICATION_HEIGHT = 600;
-  /** Dimensions of game board (usually the same) */
-  private static final int WIDTH = APPLICATION_WIDTH;
-  private static final int HEIGHT = APPLICATION_HEIGHT;
   /** Dimensions of the paddle */
   private static final int PADDLE_WIDTH = 60;
   private static final int PADDLE_HEIGHT = 10;
@@ -81,23 +100,29 @@ class DrawPanel extends JPanel {
   private static final int BRICK_SEP = 4;
   /** Width of a brick */
   private static final int BRICK_WIDTH =
-  (WIDTH - (NBRICKS_PER_ROW - 1) * BRICK_SEP) / NBRICKS_PER_ROW;
+  (APPLICATION_WIDTH - (NBRICKS_PER_ROW - 1) * BRICK_SEP) / NBRICKS_PER_ROW;
   /** Height of a brick */
   private static final int BRICK_HEIGHT = 8;
   /** Radius of the ball in pixels */
   private static final int BALL_RADIUS = 10;
   /** Offset of the top brick row from the top */
   private static final int BRICK_Y_OFFSET = 70;
+  /** Dimensions of game board (usually the same) */
+  private static final int WIDTH = BRICK_WIDTH * NBRICKS_PER_ROW + BRICK_SEP * (NBRICKS_PER_ROW - 1);
+  private static final int HEIGHT = APPLICATION_HEIGHT;
   /** Number of turns */
   private static final int NTURNS = 3;
   /** x-coordinate of array of bricks **/
-  private static int[][] xPos = new int[NBRICKS_PER_ROW][NBRICK_ROWS];
+  private int[][] xBrick = new int[NBRICKS_PER_ROW][NBRICK_ROWS];
   /** y-coordinate of array of bricks **/
-  private static int[][] yPos = new int[NBRICKS_PER_ROW][NBRICK_ROWS];
+  private int[][] yBrick = new int[NBRICKS_PER_ROW][NBRICK_ROWS];
   /** Color of bricks by row **/
-  private static Color[] rowColor = new Color[]{Color.RED, Color.RED, Color.ORANGE, Color.ORANGE, Color.YELLOW, Color.YELLOW, Color.GREEN, Color.GREEN, Color.CYAN, Color.CYAN};
+  private Color[] rowColor = new Color[]{Color.RED, Color.RED, Color.ORANGE, Color.ORANGE, Color.YELLOW, Color.YELLOW, Color.GREEN, Color.GREEN, Color.CYAN, Color.CYAN};
   /** Visibility of array of bricks **/
-  private static Boolean[][] visi = new Boolean[NBRICKS_PER_ROW][NBRICK_ROWS];
+  private Boolean[][] visi = new Boolean[NBRICKS_PER_ROW][NBRICK_ROWS];
+  /** Paddle x and y position **/
+  private int xPaddle = 0;
+  private int yPaddle = 0;
 }
 
 // class Circle {
