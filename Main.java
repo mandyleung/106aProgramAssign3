@@ -132,16 +132,12 @@ class DrawPanel extends JPanel {
 
   private void checkBounds() {
     if (checkLeftBound()) {
-      xBall = -xBall;
       xVelBall = -xVelBall;
     } else if (checkRightBound()) {
-      xBall = WIDTH - (xBall - WIDTH);
       xVelBall = -xVelBall;
     } else if (checkTopBound()) {
-      yBall = -yBall;
       yVelBall = -yVelBall;
     } else if (checkBottomBound()) {
-      yBall = HEIGHT - (yBall - HEIGHT);
       yVelBall = -yVelBall;
     }
   }
@@ -151,7 +147,7 @@ class DrawPanel extends JPanel {
   }
 
   private Boolean checkRightBound(){
-    return xBall >= WIDTH ? true : false;
+    return (xBall + BALL_RADIUS * 2) >= WIDTH ? true : false;
   }
 
   private Boolean checkTopBound(){
@@ -159,23 +155,26 @@ class DrawPanel extends JPanel {
   }
 
   private Boolean checkBottomBound(){
-    return yBall >= HEIGHT ? true : false;
+    return (yBall + BALL_RADIUS * 2) >= HEIGHT ? true : false;
   }
 
   private void hitPaddle() {
-    Rectangle2D paddleTop = new Rectangle2D.Double(paddle.getX(), paddle.getY(), paddle.getWidth(), BALL_RADIUS * 2 - 1);
-    if (paddleTop.contains(p1) || paddleTop.contains(p2) || paddleTop.contains(p3) || paddleTop.contains(p4)) {
+    /** check only the bottom of the ball against top of the paddle **/
+    Rectangle2D paddleTop = new Rectangle2D.Double(paddle.getX(), paddle.getY(), paddle.getWidth(), Math.abs(yVelBall));
+    if (paddleTop.contains(p3) || paddleTop.contains(p4)) {
       yVelBall = -yVelBall;
     }
   }
 
   private void hitBrick() {
-
+    System.out.println("x = " + xBall + " y = " + yBall + " xVel = " + (int) xVelBall + " yVel = " + (int) yVelBall);
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
         if (visi[i][j] && (bricks[i][j].contains(p1) || bricks[i][j].contains(p2) || bricks[i][j].contains(p3) || bricks[i][j].contains(p4))){
           visi[i][j] = false;
           yVelBall = -yVelBall;
+          System.out.println("brick removed " + i + ", ", j);
+          break;
         }
       }
     }
