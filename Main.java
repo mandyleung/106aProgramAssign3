@@ -24,6 +24,7 @@ class Main {
     new Thread(new Runnable() {
       public void run() {
         f.play();
+        f.dispose();
       }
     }).start();
   };
@@ -87,7 +88,14 @@ class DrawPanel extends JPanel {
     for (int i = 0; i < NTURNS; i++) {
       roundEnd = false;
       initBall();
-      repaint();
+      switch (i) {
+        case NTURNS - 1: 
+          displayMessage("1 Life Left", false);
+          break;
+        default: 
+          displayMessage((NTURNS - i) + " Lives Left", false);
+      }
+
       while (!roundEnd) {
         /** move ball **/
         updateBall(xBall + xVelBall, yBall + yVelBall);
@@ -103,7 +111,7 @@ class DrawPanel extends JPanel {
         /** pause **/
         try {
           // thread to sleep for 100 milliseconds
-          Thread.sleep(10);
+          Thread.sleep(1);
          } catch (Exception e) {
           System.out.println(e);
          }
@@ -111,7 +119,26 @@ class DrawPanel extends JPanel {
       if (gameWon) break;
     }
 
-    System.out.println(gameWon);
+    if (gameWon) {
+      displayMessage("You Won!", true);
+    } else {
+      displayMessage("You Lost", true);
+    }
+  }
+
+  private void displayMessage(String s, Boolean permanent) {
+    message = s;
+    visiMessage = true;
+    repaint();
+    if (!permanent) {
+      /** pause **/
+      try {
+        Thread.sleep(2000);
+      } catch (Exception e) {
+        System.out.println(e);
+      }
+      visiMessage = false;
+    }
   }
 
   private void updateBall(double x, double y) {
@@ -175,16 +202,14 @@ class DrawPanel extends JPanel {
   }
 
   private Boolean hitBrick() {
-    System.out.println("x = " + xBall + " y = " + yBall + " xVel = " + (int) xVelBall + " yVel = " + (int) yVelBall);
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
         if (visi[i][j] && (bricks[i][j].contains(p1) || bricks[i][j].contains(p2) || bricks[i][j].contains(p3) || bricks[i][j].contains(p4))){
           visi[i][j] = false;
           bricksLeft --;
           yVelBall = -yVelBall;
-          System.out.println("brick removed " + i + ", " + j + " loc = " + bricks[i][j].getX() + ", " + bricks[i][j].getY()+ ", " + BRICK_WIDTH + ", " + BRICK_HEIGHT);
           /** break both loops so that only 1 brick can be removed at a time **/
-          return bricksLeft = 0 ? true : false;
+          return bricksLeft == 0 ? true : false;
         }
       }
     }
@@ -215,13 +240,18 @@ class DrawPanel extends JPanel {
     /** Paint Ball **/
     g2d.setColor(Color.BLACK);
     g2d.fill(ball);
+
+    /** paint system message **/
+    if (visiMessage) {
+      g2d.drawString(message, WIDTH/2 - 30, HEIGHT/2 - 50);
+    }
   }  
 
   /** Width and height of application window in pixels */
   public static final int APPLICATION_WIDTH = 400;
   public static final int APPLICATION_HEIGHT = 600;
   /** Dimensions of the paddle */
-  private static final int PADDLE_WIDTH = 60;
+  private static final int PADDLE_WIDTH = 60; 
   private static final int PADDLE_HEIGHT = 10;
   /** Offset of the paddle up from the bottom */
   private static final int PADDLE_Y_OFFSET = 30;
@@ -266,6 +296,9 @@ class DrawPanel extends JPanel {
   Point2D p2 = new Point2D.Double(0, 0);
   Point2D p3 = new Point2D.Double(0, 0);
   Point2D p4 = new Point2D.Double(0, 0);
+  /** System message and visibility **/
+  String message = "3 Lives Left";
+  Boolean visiMessage = false;
   /** Random object **/
   private Random rand = new Random();
 }
