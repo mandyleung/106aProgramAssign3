@@ -10,27 +10,38 @@ import java.io.*;
 import java.util.Arrays;
 import java.awt.event.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Ellipse2D;
+import java.lang.*;
+import java.awt.geom.Point2D;
 
 class Main {
   public static void main(String[] args) {
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        Breakout f = new Breakout();
         f.breakout();
       }
     });
-  }
+    new Thread(new Runnable() {
+      public void run() {
+        f.play();
+      }
+    }).start();
+  };
+  private static Breakout f = new Breakout();
 }
 
 class Breakout extends JFrame {
   public void breakout() {
     JFrame f = new JFrame("Breakout game");
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    DrawPanel d = new DrawPanel();
     f.add(d);
     f.pack();
     f.setVisible(true);
   }
+  public void play(){
+    d.play();
+  }
+  private DrawPanel d = new DrawPanel();
 }
 
 class DrawPanel extends JPanel {
@@ -68,6 +79,111 @@ class DrawPanel extends JPanel {
 
   }
 
+  public void play() {
+    Boolean roundEnd = false;
+
+    /** Intialize ball location and velocity. Move ball. Check if ball hit screen edges and change velocity accordingly. End round if ball hits bottom edge. **/
+    for (int i = 0; i < NTURNS; i++) {
+      roundEnd = false;
+      initBall();
+      repaint();
+      while (!roundEnd) {
+        /** move ball **/
+        updateBall(xBall + (int) xVelBall, yBall + (int) yVelBall);
+
+        /** check if ball is hitting game edges, paddle or bricks and update game elements accordingly **/
+        checkBounds();
+        // hitPaddle();
+        // hitBrick();
+        
+        repaint();
+        /** pause **/
+        try {
+          // thread to sleep for 100 milliseconds
+          Thread.sleep(10);
+         } catch (Exception e) {
+          System.out.println(e);
+         }
+         System.out.println("loop");
+      }
+    }
+  }
+
+  private void updateBall(int x, int y) {
+    /** update ball location **/
+    xBall = x;
+    yBall = y;
+    ball.setFrame(x, y, BALL_RADIUS, BALL_RADIUS);
+    /** update 4 corners of ball **/
+    p1.setLocation(xBall, yBall);
+    p2.setLocation(xBall + BALL_RADIUS, yBall);
+    p3.setLocation(xBall, yBall + BALL_RADIUS);
+    p4.setLocation(xBall + BALL_RADIUS, yBall + BALL_RADIUS);
+  }
+
+  private void initBall(){
+    /** Set ball to the middle of the screen to start a round **/
+    updateBall(WIDTH / 2 - BALL_RADIUS, HEIGHT / 2 - BALL_RADIUS);
+
+    /** Initialize velocity/direction of ball **/
+    xVelBall = rand.nextDouble() * 2 + 1;
+    if (rand.nextBoolean()) xVelBall = -xVelBall; //set initial x velocity to (-3 to -1) or (1 to 3)
+    yVelBall = 3;
+  }
+
+  private void checkBounds() {
+    if (checkLeftBound()) {
+      xBall = -xBall;
+      xVelBall = -xVelBall;
+    } else if (checkRightBound()) {
+      xBall = WIDTH - (xBall - WIDTH);
+      xVelBall = -xVelBall;
+    } else if (checkTopBound()) {
+      yBall = -yBall;
+      yVelBall = -yVelBall;
+    } else if (checkBottomBound()) {
+      yBall = HEIGHT - (yBall - HEIGHT);
+      yVelBall = -yVelBall;
+    }
+  }
+
+  private Boolean checkLeftBound(){
+    return xBall <= 0 ? true : false;
+  }
+
+  private Boolean checkRightBound(){
+    return xBall >= WIDTH ? true : false;
+  }
+
+  private Boolean checkTopBound(){
+    return yBall <= 0 ? true : false;
+  }
+
+  private Boolean checkBottomBound(){
+    return yBall >= HEIGHT ? true : false;
+  }
+
+  private void hitPaddle() {
+
+    if (paddle.contains(p1) || paddle.contains(p2) || paddle.contains(p3) || paddle.contains(p4)) {
+      yVelBall = -yVelBall;
+    }
+  }
+
+  private void hitBrick() {
+
+    for (int i = 0; i < NBRICKS_PER_ROW; i++) {
+      for (int j = 0; j < NBRICK_ROWS; j++) {
+        if (visi[i][j] && (bricks[i][j].contains(p1) || bricks[i][j].contains(p2) || bricks[i][j].contains(p3) || bricks[i][j].contains(p4))){
+          visi[i][j] = false;
+          yVelBall = -yVelBall;
+        }
+      }
+    }
+
+  }
+
+
   public Dimension getPreferredSize() {
     return new Dimension(WIDTH,HEIGHT);
   }
@@ -85,6 +201,10 @@ class DrawPanel extends JPanel {
     /** Paint Paddle **/
     g2d.setColor(Color.BLACK);
     g2d.fill(paddle);
+
+    /** Paint Ball **/
+    g2d.setColor(Color.BLACK);
+    g2d.fill(ball);
   }  
 
   /** Width and height of application window in pixels */
@@ -123,6 +243,19 @@ class DrawPanel extends JPanel {
   private Boolean[][] visi = new Boolean[NBRICKS_PER_ROW][NBRICK_ROWS];
   /** Paddle object **/
   private Rectangle2D paddle;
+  /** Ball object, velocity and location **/
+  private int xBall = 0;
+  private int yBall = 0;
+  private double xVelBall = 0;
+  private double yVelBall = 0;
+  private Ellipse2D ball = new Ellipse2D.Double(xBall, yBall, BALL_RADIUS, BALL_RADIUS);
+  /** 4 corners of ball **/
+  Point2D p1 = new Point2D.Double(0, 0);
+  Point2D p2 = new Point2D.Double(0, 0);
+  Point2D p3 = new Point2D.Double(0, 0);
+  Point2D p4 = new Point2D.Double(0, 0);
+  /** Random object **/
+  private Random rand = new Random();
 }
 
 // class Circle {
