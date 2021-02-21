@@ -89,14 +89,14 @@ class DrawPanel extends JPanel {
       repaint();
       while (!roundEnd) {
         /** move ball **/
-        updateBall(xBall + (int) xVelBall, yBall + (int) yVelBall);
+        updateBall(xBall + xVelBall, yBall + yVelBall);
 
         /** check if ball is hitting game edges, paddle or bricks and update game elements accordingly **/
         checkBounds();
         hitPaddle();
         hitBrick();
-        
         repaint();
+
         /** pause **/
         try {
           // thread to sleep for 100 milliseconds
@@ -104,21 +104,20 @@ class DrawPanel extends JPanel {
          } catch (Exception e) {
           System.out.println(e);
          }
-         System.out.println("loop");
       }
     }
   }
 
-  private void updateBall(int x, int y) {
+  private void updateBall(double x, double y) {
     /** update ball location **/
     xBall = x;
     yBall = y;
-    ball.setFrame(x, y, BALL_RADIUS, BALL_RADIUS);
+    ball.setFrame(x, y, BALL_RADIUS * 2, BALL_RADIUS * 2);
     /** update 4 corners of ball **/
     p1.setLocation(xBall, yBall);
-    p2.setLocation(xBall + BALL_RADIUS, yBall);
-    p3.setLocation(xBall, yBall + BALL_RADIUS);
-    p4.setLocation(xBall + BALL_RADIUS, yBall + BALL_RADIUS);
+    p2.setLocation(xBall + BALL_RADIUS * 2, yBall);
+    p3.setLocation(xBall, yBall + BALL_RADIUS * 2);
+    p4.setLocation(xBall + BALL_RADIUS * 2, yBall + BALL_RADIUS * 2);
   }
 
   private void initBall(){
@@ -164,8 +163,8 @@ class DrawPanel extends JPanel {
   }
 
   private void hitPaddle() {
-
-    if (paddle.contains(p1) || paddle.contains(p2) || paddle.contains(p3) || paddle.contains(p4)) {
+    Rectangle2D paddleTop = new Rectangle2D.Double(paddle.getX(), paddle.getY(), paddle.getWidth(), BALL_RADIUS * 2 - 1);
+    if (paddleTop.contains(p1) || paddleTop.contains(p2) || paddleTop.contains(p3) || paddleTop.contains(p4)) {
       yVelBall = -yVelBall;
     }
   }
@@ -246,11 +245,11 @@ class DrawPanel extends JPanel {
   /** Paddle object **/
   private Rectangle2D paddle;
   /** Ball object, velocity and location **/
-  private int xBall = 0;
-  private int yBall = 0;
+  private double xBall = 0;
+  private double yBall = 0;
   private double xVelBall = 0;
   private double yVelBall = 0;
-  private Ellipse2D ball = new Ellipse2D.Double(xBall, yBall, BALL_RADIUS, BALL_RADIUS);
+  private Ellipse2D ball = new Ellipse2D.Double(0, 0, 0, 0);
   /** 4 corners of ball **/
   Point2D p1 = new Point2D.Double(0, 0);
   Point2D p2 = new Point2D.Double(0, 0);
