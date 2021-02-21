@@ -81,6 +81,7 @@ class DrawPanel extends JPanel {
 
   public void play() {
     Boolean roundEnd = false;
+    Boolean gameWon = false;
 
     /** Intialize ball location and velocity. Move ball. Check if ball hit screen edges and change velocity accordingly. End round if ball hits bottom edge. **/
     for (int i = 0; i < NTURNS; i++) {
@@ -92,10 +93,12 @@ class DrawPanel extends JPanel {
         updateBall(xBall + xVelBall, yBall + yVelBall);
 
         /** check if ball is hitting game edges, paddle or bricks and update game elements accordingly **/
-        checkBounds();
+        roundEnd = checkBounds();
         hitPaddle();
-        hitBrick();
+        gameWon = hitBrick();
         repaint();
+
+        if (gameWon) break;
 
         /** pause **/
         try {
@@ -105,7 +108,10 @@ class DrawPanel extends JPanel {
           System.out.println(e);
          }
       }
+      if (gameWon) break;
     }
+
+    System.out.println(gameWon);
   }
 
   private void updateBall(double x, double y) {
@@ -130,7 +136,7 @@ class DrawPanel extends JPanel {
     yVelBall = 3;
   }
 
-  private void checkBounds() {
+  private Boolean checkBounds() {
     if (checkLeftBound()) {
       xVelBall = -xVelBall;
     } else if (checkRightBound()) {
@@ -139,7 +145,9 @@ class DrawPanel extends JPanel {
       yVelBall = -yVelBall;
     } else if (checkBottomBound()) {
       yVelBall = -yVelBall;
+      return true;
     }
+    return false;
   }
 
   private Boolean checkLeftBound(){
@@ -166,19 +174,21 @@ class DrawPanel extends JPanel {
     }
   }
 
-  private void hitBrick() {
+  private Boolean hitBrick() {
     System.out.println("x = " + xBall + " y = " + yBall + " xVel = " + (int) xVelBall + " yVel = " + (int) yVelBall);
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
         if (visi[i][j] && (bricks[i][j].contains(p1) || bricks[i][j].contains(p2) || bricks[i][j].contains(p3) || bricks[i][j].contains(p4))){
           visi[i][j] = false;
+          bricksLeft --;
           yVelBall = -yVelBall;
-          System.out.println("brick removed " + i + ", ", j);
-          break;
+          System.out.println("brick removed " + i + ", " + j + " loc = " + bricks[i][j].getX() + ", " + bricks[i][j].getY()+ ", " + BRICK_WIDTH + ", " + BRICK_HEIGHT);
+          /** break both loops so that only 1 brick can be removed at a time **/
+          return bricksLeft = 0 ? true : false;
         }
       }
     }
-
+    return false;
   }
 
 
@@ -237,6 +247,8 @@ class DrawPanel extends JPanel {
   private static final int NTURNS = 3;
   /** Array of bricks **/
   private Rectangle2D[][] bricks = new Rectangle2D[NBRICKS_PER_ROW][NBRICK_ROWS];
+  /** Num of bricks still on the screen **/
+  int bricksLeft = NBRICK_ROWS * NBRICK_ROWS;
   /** Color of bricks by row **/
   private Color[] rowColor = new Color[]{Color.RED, Color.RED, Color.ORANGE, Color.ORANGE, Color.YELLOW, Color.YELLOW, Color.GREEN, Color.GREEN, Color.CYAN, Color.CYAN};
   /** Visibility of array of bricks **/
