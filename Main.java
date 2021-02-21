@@ -93,8 +93,8 @@ class DrawPanel extends JPanel {
 
         /** check if ball is hitting game edges, paddle or bricks and update game elements accordingly **/
         checkBounds();
-        // hitPaddle();
-        // hitBrick();
+        hitPaddle();
+        hitBrick();
         
         repaint();
         /** pause **/
@@ -194,8 +194,10 @@ class DrawPanel extends JPanel {
     /** Paint Bricks **/
     for (int i = 0; i < NBRICKS_PER_ROW; i++) {
       for (int j = 0; j < NBRICK_ROWS; j++) {
-        g2d.setColor(rowColor[j]);
-        g2d.fill(bricks[i][j]);
+        if (visi[i][j]) {
+          g2d.setColor(rowColor[j]);
+          g2d.fill(bricks[i][j]);
+        }
       }
     }
     /** Paint Paddle **/
@@ -257,25 +259,3 @@ class DrawPanel extends JPanel {
   /** Random object **/
   private Random rand = new Random();
 }
-
-// class Circle {
-  
-//   public void generateCircle(int panelWidth, int panelHeight) {
-//     int diameter = rand.nextInt(45) + 5;
-//     int rightLimit = panelWidth-diameter;
-//     int bottomLimit = panelHeight-diameter;
-//     int xLoc = rand.nextInt(rightLimit);
-//     int yLoc = rand.nextInt(bottomLimit);
-//     circles.add(new Ellipse2D.Double(xLoc, yLoc, diameter, diameter));
-//   }
-
-//   public void paintCircle(Graphics g) {
-//     Graphics2D g2d = (Graphics2D) g; 
-//     for (int i = 0; i < circles.size(); i++) {
-//       g2d.setPaint(new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
-//       g2d.fill(circles.get(i));
-//     }
-//   }
-
-//   private Random rand = new Random();  
-//   private ArrayList<Ellipse2D> circles = new ArrayList<Ellipse2D>()
